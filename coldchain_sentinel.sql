@@ -58,9 +58,9 @@ CREATE TABLE Usuario (
     id_rol INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    gmail VARCHAR(150) NOT NULL UNIQUE,
+    email VARCHAR(150) NOT NULL UNIQUE,
     phone VARCHAR(20),
-    password_hash VARCHAR(256) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'activo' CHECK (status IN ('activo', 'inactivo')),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_Usuario_Rol FOREIGN KEY (id_rol)
@@ -224,3 +224,5 @@ CREATE INDEX idx_lote_afectado_id_lote ON Lote_afectado (id_lote);
 CREATE INDEX idx_lote_afectado_id_accion ON Lote_afectado (id_accion_protocolo);
 CREATE INDEX idx_reporte_id_lote_afectado ON Reporte (id_lote_afectado);
 CREATE INDEX idx_traslacion_id_reporte ON Traslacion (id_reporte);
+
+

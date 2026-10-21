@@ -9,6 +9,11 @@ lerna-debug.log*
 
 node_modules
 .DS_Store
+
+# Variables de entorno (credenciales de base de datos y correo)
+.env
+.env.local
+*.env.local
 dist
 dist-ssr
 coverage

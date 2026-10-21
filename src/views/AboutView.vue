@@ -1,6 +1,7 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h1>Acerca de ColdChain Sentinel</h1>
+    <p>Plataforma de monitoreo en tiempo real de cadena de frío y trazabilidad hospitalaria GxP.</p>
   </div>
 </template>
 
@@ -9,7 +10,11 @@
   .about {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
+    gap: 1rem;
+    color: #f9fafb;
   }
 }
 </style>

@@ -1,18 +1,14 @@
 <script setup>
 import { ref, onMounted, onUnmounted, provide } from 'vue'
-import { RouterView } from 'vue-router'
+import LoginView from './components/LoginView.vue'
+import HomeView from './views/HomeView.vue'
+import AlertCenter from './components/AlertCenter.vue'
 
-// --- Autenticación y RBAC ---
-const usuarios = [
-  { id: 1, name: 'Carlos Méndez', role: 'TECNICO', roleLabel: 'Técnico de Turno', avatar: '👨‍🔧' },
-  { id: 2, name: 'Dra. Elena Ramos', role: 'SUPERVISOR', roleLabel: 'Supervisora de Calidad', avatar: '👩‍⚕️' },
-  { id: 3, name: 'Dr. Roberto Silva', role: 'DIRECTOR', roleLabel: 'Director del Laboratorio', avatar: '👨‍💼' },
-  { id: 4, name: 'Ana Gómez', role: 'INVENTARIO', roleLabel: 'Gestora de Inventario', avatar: '📦' }
-]
+// --- ESTADO DE AUTENTICACIÓN (IAM) ---
+const usuarioActivo = ref(null)
+const cargandoSesion = ref(true)
 
-const usuarioActivo = ref(usuarios[0])
-
-// --- Estado Global de Telemetría e Incidentes ---
+// --- ESTADO GLOBAL DE TELEMETRÍA E INCIDENTES ---
 const conectado = ref(false)
 const sensores = ref([])
 const incidentes = ref([])
@@ -23,19 +19,31 @@ const metricas = ref({
   incidentesActivos: 0,
   incidentesCerrados: 0,
   mttrMinutos: 0,
-  lotesEnRevision: 0
+  lotesEnRevision: 0,
+  usuariosPendientes: 0
 })
+const usuariosIAM = ref([])
 const slaAcelerado = ref(true)
+
+const rolEtiquetas = {
+  DIRECTOR: 'Director del Laboratorio',
+  SUPERVISOR: 'Supervisora de Calidad',
+  TECNICO: 'Técnico de Turno',
+  INVENTARIO: 'Gestora de Inventario'
+}
 
 let socket = null
 let reconnectInterval = null
 
+// Conexión en tiempo real por WebSocket
 const conectarWebSocket = () => {
+  if (socket && socket.readyState === 1) return
+
   socket = new WebSocket('ws://localhost:3000')
 
   socket.onopen = () => {
     conectado.value = true
-    console.log('✅ Conectado a ColdChain Sentinel WebSocket')
+    console.log('✅ WebSocket conectado a ColdChain Sentinel')
   }
 
   socket.onmessage = (event) => {
@@ -47,26 +55,123 @@ const conectarWebSocket = () => {
         lotes.value = data.lotes || []
         lotesAfectados.value = data.lotesAfectados || []
         metricas.value = data.metricas || metricas.value
+        if (data.usuariosIAM) {
+          usuariosIAM.value = data.usuariosIAM
+        }
       }
     } catch (e) {
-      console.error('Error parseando mensaje WebSocket:', e)
+      console.error('Error parseando WebSocket:', e)
     }
   }
 
   socket.onclose = () => {
     conectado.value = false
-    console.log('⚠️ WebSocket desconectado. Reintentando...')
   }
 
-  socket.onerror = (err) => {
+  socket.onerror = () => {
     conectado.value = false
+    if (socket) socket.close()
+  }
+}
+
+// Cargar usuarios IAM para la vista del Director
+const recargarUsuariosIAM = async () => {
+  const token = localStorage.getItem('coldchain_token')
+  if (!token || !usuarioActivo.value || usuarioActivo.value.rol !== 'DIRECTOR') return
+
+  try {
+    const res = await fetch('http://localhost:3000/api/iam/usuarios', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    const data = await res.json()
+    if (res.ok && data.usuarios) {
+      usuariosIAM.value = data.usuarios
+    }
+  } catch (e) {
+    console.error('Error cargando usuarios IAM:', e)
+  }
+}
+
+// Verificar sesión JWT al iniciar la aplicación
+const verificarSesion = async () => {
+  const token = localStorage.getItem('coldchain_token')
+  if (!token) {
+    usuarioActivo.value = null
+    cargandoSesion.value = false
+    return
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    const data = await res.json()
+
+    if (res.ok && data.usuario) {
+      usuarioActivo.value = data.usuario
+      conectarWebSocket()
+      if (data.usuario.rol === 'DIRECTOR') {
+        recargarUsuariosIAM()
+      }
+    } else {
+      cerrarSesion()
+    }
+  } catch (err) {
+    console.error('Error validando token JWT:', err)
+    // En caso de que el backend no responda temporalmente pero haya usuario en localStorage
+    const saved = localStorage.getItem('coldchain_user')
+    if (saved) {
+      usuarioActivo.value = JSON.parse(saved)
+    }
+  } finally {
+    cargandoSesion.value = false
+  }
+}
+
+const handleLoginSuccess = (usuario) => {
+  usuarioActivo.value = usuario
+  conectarWebSocket()
+  if (usuario.rol === 'DIRECTOR') {
+    recargarUsuariosIAM()
+  }
+}
+
+const cerrarSesion = () => {
+  localStorage.removeItem('coldchain_token')
+  localStorage.removeItem('coldchain_user')
+  usuarioActivo.value = null
+  if (socket) {
     socket.close()
   }
 }
 
 const toggleSlaVelocidad = async () => {
+  const token = localStorage.getItem('coldchain_token')
   try {
-    const res = await fetch('http://localhost:3000/api/config/sla-acelerado', { method: 'POST' })
+    const res = await fetch('http://localhost:3000/api/config/sla-acelerado', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      // Fijamos explícitamente el estado deseado (evita desincronizaciones)
+      body: JSON.stringify({ acelerado: !slaAcelerado.value })
+    })
+    const data = await res.json()
+    slaAcelerado.value = data.aceleradoSLA
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// Sincroniza el indicador de la interfaz con el estado real del backend (solo lectura)
+const sincronizarSla = async () => {
+  try {
+    const res = await fetch('http://localhost:3000/api/config/sla-acelerado')
     const data = await res.json()
     slaAcelerado.value = data.aceleradoSLA
   } catch (e) {
@@ -75,9 +180,10 @@ const toggleSlaVelocidad = async () => {
 }
 
 onMounted(() => {
-  conectarWebSocket()
+  verificarSesion()
+  sincronizarSla()
   reconnectInterval = setInterval(() => {
-    if (!conectado.value) {
+    if (usuarioActivo.value && !conectado.value) {
       conectarWebSocket()
     }
   }, 4000)
@@ -88,19 +194,25 @@ onUnmounted(() => {
   if (socket) socket.close()
 })
 
-// Proveer datos globales a las vistas hijas
+// Proveer dependencias y estados globales
 provide('usuarioActivo', usuarioActivo)
 provide('sensores', sensores)
 provide('incidentes', incidentes)
 provide('lotes', lotes)
 provide('lotesAfectados', lotesAfectados)
 provide('metricas', metricas)
+provide('usuariosIAM', usuariosIAM)
+provide('recargarUsuariosIAM', recargarUsuariosIAM)
 provide('conectado', conectado)
 </script>
 
 <template>
-  <div class="sentinel-layout">
-    <!-- Header Corporativo y de Monitoreo -->
+  <!-- PANTALLA EXCLUSIVA DE LOGIN / REGISTRO SI NO ESTÁ AUTENTICADO -->
+  <LoginView v-if="!usuarioActivo" @login-exitoso="handleLoginSuccess" />
+
+  <!-- INTERFAZ PRINCIPAL DE LA PLATAFORMA PARA USUARIOS AUTENTICADOS -->
+  <div v-else class="sentinel-layout">
+    <!-- Header Corporativo -->
     <header class="top-nav">
       <div class="nav-left">
         <div class="brand">
@@ -119,24 +231,31 @@ provide('conectado', conectado)
           <span>{{ conectado ? 'Telemetría en Vivo' : 'Reconectando IoT...' }}</span>
         </div>
 
-        <!-- Modo SLA Demo -->
-        <button class="btn-demo-sla" @click="toggleSlaVelocidad" :title="'Velocidad SLA: ' + (slaAcelerado ? 'Acelerado 15s/30s' : 'Real 5m/10m')">
-          ⏱️ SLA: <strong>{{ slaAcelerado ? 'Demo (15s/30s)' : 'Real (5m/10m)' }}</strong>
+        <!-- Modo SLA Demostración -->
+        <button class="btn-demo-sla" @click="toggleSlaVelocidad" :title="'Velocidad SLA: ' + (slaAcelerado ? 'Acelerado 15s/30s' : 'Tiempo Real 5m/10m')">
+          ⏱️ SLA: <strong>{{ slaAcelerado ? 'Demostración (15s/30s)' : 'Tiempo Real (5m/10m)' }}</strong>
         </button>
 
-        <!-- Selector de Rol RBAC (IAM) -->
-        <div class="user-selector">
-          <span class="role-badge">{{ usuarioActivo.avatar }} {{ usuarioActivo.roleLabel }}</span>
-          <select v-model="usuarioActivo" class="select-role">
-            <option v-for="u in usuarios" :key="u.id" :value="u">
-              {{ u.avatar }} {{ u.name }} — {{ u.roleLabel }}
-            </option>
-          </select>
+        <!-- Centro de Alertas en tiempo real (campana + toasts + sonido) -->
+        <AlertCenter :incidentes="incidentes" :conectado="conectado" />
+
+        <!-- Perfil del Usuario Autenticado (IAM) -->
+        <div class="user-profile-badge">
+          <span class="user-avatar">{{ usuarioActivo.avatar || '👤' }}</span>
+          <div class="user-info">
+            <span class="user-name">{{ usuarioActivo.nombre }} {{ usuarioActivo.apellido }}</span>
+            <span class="role-tag" :class="usuarioActivo.rol.toLowerCase()">{{ rolEtiquetas[usuarioActivo.rol] || usuarioActivo.rol }}</span>
+          </div>
         </div>
+
+        <!-- Botón Cerrar Sesión -->
+        <button class="btn-logout" @click="cerrarSesion" title="Cerrar Sesión Segura">
+          🚪 Cerrar Sesión
+        </button>
       </div>
     </header>
 
-    <!-- Banner de Alerta Crítica Global (si hay protocolo de emergencia activo) -->
+    <!-- Banner de Alerta Crítica Global (Protocolo de Emergencia Minuto 10) -->
     <div v-if="incidentes.some(i => i.protocoloEmergenciaActivo && i.estado !== 'Cerrado')" class="emergency-banner blink">
       ⚠️ <strong>¡ALERTA DE PROTOCOLO DE EMERGENCIA ACTIVADO (NIVEL 3)!</strong>
       Excursión térmica no acusada tras 10 minutos. Se ha notificado al Director del Laboratorio y se requiere intervención inmediata en sala <code>room_911</code>.
@@ -144,17 +263,18 @@ provide('conectado', conectado)
 
     <!-- Contenedor Principal -->
     <main class="main-content">
-      <RouterView />
+      <HomeView />
     </main>
 
-    <!-- Footer de Auditoría -->
+    <!-- Footer de Cumplimiento Normativo GxP -->
     <footer class="app-footer">
       <div>
-        <span>ColdChain Sentinel v2.4</span> · <span>ISO 13485 & GxP Compliance</span> ·
-        <span>Base de Datos: <strong>coldchain_sentinel (PostgreSQL)</strong></span>
+        <span>ColdChain Sentinel v3.0</span> · <span>Cumplimiento Normativo GxP e ISO 13485</span> ·
+        <span>Base de Datos: <strong>coldchain_sentinel (PostgreSQL)</strong></span> ·
+        <span>Sala: <strong>room_911</strong></span>
       </div>
       <div>
-        <span>Usuario actual: <strong>{{ usuarioActivo.name }}</strong> ({{ usuarioActivo.role }})</span>
+        <span>Sesión activa: <strong>{{ usuarioActivo.email }}</strong> · Rol: <strong>{{ rolEtiquetas[usuarioActivo.rol] || usuarioActivo.rol }}</strong></span>
       </div>
     </footer>
   </div>
@@ -277,36 +397,58 @@ provide('conectado', conectado)
   border-color: #64748b;
 }
 
-.user-selector {
+.user-profile-badge {
   display: flex;
   align-items: center;
-  position: relative;
+  gap: 0.6rem;
   background: #1e293b;
   border: 1px solid #475569;
   border-radius: 8px;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.75rem;
 }
 
-.role-badge {
-  font-size: 0.8rem;
-  margin-right: 0.4rem;
-  font-weight: 500;
-  color: #cbd5e1;
+.user-avatar {
+  font-size: 1.3rem;
 }
 
-.select-role {
-  background: transparent;
-  color: white;
-  border: none;
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
   font-size: 0.8rem;
-  padding: 0.2rem;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.role-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.role-tag.director { color: #f59e0b; }
+.role-tag.supervisor { color: #38bdf8; }
+.role-tag.tecnico { color: #34d399; }
+.role-tag.inventario { color: #ec4899; }
+
+.btn-logout {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  outline: none;
+  transition: all 0.2s;
 }
 
-.select-role option {
-  background: #1f2937;
-  color: white;
+.btn-logout:hover {
+  background: #ef4444;
+  color: #ffffff;
 }
 
 .emergency-banner {

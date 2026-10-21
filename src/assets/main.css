@@ -1,6 +1,7 @@
 /* ==========================================================================
-   ColdChain Sentinel - Global Stylesheet
-   Modern Industrial & Medical Dark Dashboard Theme
+   ColdChain Sentinel - Hoja de Estilos Global
+   Tema "Clinical Frost" · Dashboard Industrial & Médico (Oscuro)
+   Paleta renovada: azul glacial + cian clínico + semáforo GxP
    ========================================================================== */
 
 * {
@@ -10,35 +11,71 @@
 }
 
 :root {
-  --bg-primary: #0b0f19;
-  --bg-surface: #111827;
-  --bg-card: #1f2937;
-  --bg-card-hover: #283548;
-  --border-color: #374151;
-  --border-light: #4b5563;
+  /* --- Superficies --- */
+  --bg-primary: #070b14;
+  --bg-surface: #0e1522;
+  --bg-card: #141d2e;
+  --bg-card-hover: #1c2942;
+  --bg-elevated: #19243a;
 
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --text-dim: #6b7280;
+  /* --- Bordes --- */
+  --border-color: #263349;
+  --border-light: #3a4a67;
+  --border-glow: rgba(56, 189, 248, 0.35);
 
-  --accent-cyan: #06b6d4;
+  /* --- Texto --- */
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* --- Acentos --- */
+  --accent-cyan: #22d3ee;
   --accent-blue: #3b82f6;
-  --color-normal: #10b981;    /* Verde */
-  --color-warning: #f59e0b;   /* Amarillo */
-  --color-danger: #ef4444;    /* Rojo */
+  --accent-indigo: #6366f1;
+  --accent-violet: #8b5cf6;
+
+  /* --- Semáforo GxP --- */
+  --color-normal: #10b981;      /* Verde  */
+  --color-warning: #f59e0b;     /* Ámbar  */
+  --color-danger: #ef4444;      /* Rojo   */
   --color-emergency: #dc2626;
 
+  /* --- Sombras --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55);
+  --shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.25);
+  --shadow-glow-danger: 0 0 20px rgba(239, 68, 68, 0.35);
+
+  /* --- Radios y transiciones --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Tipografía --- */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--bg-primary);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+    radial-gradient(1000px 500px at 90% 0%, rgba(34, 211, 238, 0.08), transparent 55%),
+    var(--bg-primary);
+  background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-sans);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition-base);
 }
 
 #app {
@@ -48,41 +85,88 @@ body {
   flex-direction: column;
 }
 
-/* Scrollbar */
+/* ==========================================================================
+   Scrollbar
+   ========================================================================== */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
+  background: linear-gradient(var(--border-color), var(--border-light));
+  border-radius: 6px;
+  border: 2px solid var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-light);
+  background: var(--accent-blue);
 }
 
-/* Utilidades de Animación */
+/* ==========================================================================
+   Animaciones y utilidades globales
+   ========================================================================== */
+
+/* Pulso rojo para elementos críticos */
 @keyframes pulse-red {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  50%      { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
 }
-
 .pulse-critical {
   animation: pulse-red 2s infinite;
 }
 
+/* Parpadeo suave */
 @keyframes flash {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%      { opacity: 0.45; }
 }
-
 .blink {
   animation: flash 1.2s infinite;
+}
+
+/* Entrada de tarjetas / paneles */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fade-in-up var(--transition-slow) both;
+}
+
+/* Deslizamiento lateral para toasts */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(120%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-out-right {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(120%); }
+}
+
+/* Latido para el indicador en vivo */
+@keyframes soft-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.35); opacity: 0.6; }
+}
+.live-dot {
+  animation: soft-pulse 1.8s ease-in-out infinite;
+}
+
+/* Barrido de brillo para botones primarios */
+@keyframes sheen {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Utilidades de texto */
+.mono { font-family: var(--font-mono); }
+.text-muted { color: var(--text-muted); }
+.text-dim { color: var(--text-dim); }
+
+/* Foco accesible coherente */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
 }
