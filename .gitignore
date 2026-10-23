@@ -8,7 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.pnpm-store
+.vite
 .DS_Store
+
+# Copia anidada local (no forma parte del proyecto principal)
+/COLDCHAIN_SENTINEL/
 
 # Variables de entorno (credenciales de base de datos y correo)
 .env

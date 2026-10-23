@@ -1,7 +1,7 @@
 /* ==========================================================================
    ColdChain Sentinel - Hoja de Estilos Global
-   Tema "Clinical Frost" · Dashboard Industrial & Médico (Oscuro)
-   Paleta renovada: azul glacial + cian clínico + semáforo GxP
+   Tema "Sage & Teal" · Dashboard Industrial & Médico
+   Paleta: Arena cálida + Teal profundo + Salvia
    ========================================================================== */
 
 * {
@@ -12,27 +12,33 @@
 
 :root {
   /* --- Superficies --- */
-  --bg-primary: #070b14;
-  --bg-surface: #0e1522;
-  --bg-card: #141d2e;
-  --bg-card-hover: #1c2942;
-  --bg-elevated: #19243a;
+  --bg-primary: #F4EBDB;      /* Fondo principal arena cálida */
+  --bg-soft: #EFE5D4;         /* Contenedores suaves sobre fondo claro */
+  --bg-surface: #2C4A52;      /* Cabecera / sidebar teal profundo */
+  --bg-card: #537072;         /* Tarjetas / módulos / secciones */
+  --bg-card-hover: #5F7D7F;   /* Hover de tarjetas */
+  --bg-input: #3F5A5E;        /* Campos y superficies internas */
+  --bg-elevated: #2C4A52;
 
   /* --- Bordes --- */
-  --border-color: #263349;
-  --border-light: #3a4a67;
-  --border-glow: rgba(56, 189, 248, 0.35);
+  --border-color: #8E9B97;    /* Salvia: bordes, acentos y elementos secundarios */
+  --border-light: #AAB4B1;
+  --border-glow: rgba(244, 235, 219, 0.28);
 
   /* --- Texto --- */
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  --text-main: #F4EBDB;       /* Texto sobre superficies teal */
+  --text-muted: #D9D2C5;      /* Texto secundario sobre teal */
+  --text-dim: #BFB7A9;        /* Texto terciario */
+  --text-on-light: #2C4A52;   /* Texto principal sobre fondo arena */
+  --text-muted-on-light: #537072;
 
   /* --- Acentos --- */
-  --accent-cyan: #22d3ee;
-  --accent-blue: #3b82f6;
-  --accent-indigo: #6366f1;
-  --accent-violet: #8b5cf6;
+  --accent-cyan: #F4EBDB;     /* Highlight cálido */
+  --accent-blue: #2C4A52;     /* Teal profundo */
+  --accent-indigo: #537072;   /* Teal medio */
+  --accent-violet: #8E9B97;   /* Salvia */
+  --accent-sage: #8E9B97;
+  --accent-sand: #F4EBDB;
 
   /* --- Semáforo GxP --- */
   --color-normal: #10b981;      /* Verde  */
@@ -40,20 +46,24 @@
   --color-danger: #ef4444;      /* Rojo   */
   --color-emergency: #dc2626;
 
-  /* --- Sombras --- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55);
-  --shadow-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.25);
+  /* --- Sombras y brillos --- */
+  --shadow-sm: 0 1px 3px rgba(44, 74, 82, 0.18);
+  --shadow-md: 0 8px 24px rgba(44, 74, 82, 0.22);
+  --shadow-lg: 0 18px 42px rgba(44, 74, 82, 0.28);
+  --shadow-glow-cyan: 0 0 22px rgba(244, 235, 219, 0.22);
+  --shadow-glow-sage: 0 0 24px rgba(142, 155, 151, 0.32);
   --shadow-glow-danger: 0 0 20px rgba(239, 68, 68, 0.35);
+  --gradient-card: linear-gradient(145deg, #5D7B7D 0%, #537072 48%, #4A6669 100%);
+  --gradient-surface: linear-gradient(135deg, #2C4A52 0%, #35575A 55%, #2C4A52 100%);
+  --gradient-highlight: linear-gradient(120deg, #F4EBDB 0%, #D9D2C5 45%, #8E9B97 100%);
 
   /* --- Radios y transiciones --- */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --transition-fast: 0.15s ease;
-  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* --- Tipografía --- */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -66,16 +76,36 @@ html {
 
 body {
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
-    radial-gradient(1000px 500px at 90% 0%, rgba(34, 211, 238, 0.08), transparent 55%),
+    radial-gradient(1100px 680px at 8% -10%, rgba(255, 252, 245, 0.92), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(83, 112, 114, 0.24), transparent 58%),
+    radial-gradient(760px 560px at 50% 112%, rgba(142, 155, 151, 0.24), transparent 66%),
     var(--bg-primary);
   background-attachment: fixed;
-  color: var(--text-main);
+  color: var(--text-on-light);
   font-family: var(--font-sans);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  transition: background-color var(--transition-base);
+  transition: background-color var(--transition-base), color var(--transition-base);
+  position: relative;
+}
+
+/* Brillo ambiental que recorre suavemente el fondo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(115deg,
+      transparent 18%,
+      rgba(244, 235, 219, 0.30) 42%,
+      rgba(142, 155, 151, 0.10) 52%,
+      transparent 68%);
+  background-size: 240% 240%;
+  animation: ambient-sheen 18s ease-in-out infinite;
+  opacity: 0.75;
 }
 
 #app {
@@ -83,6 +113,13 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: rgba(83, 112, 114, 0.35);
+  color: #F4EBDB;
 }
 
 /* ==========================================================================
@@ -96,12 +133,12 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--border-color), var(--border-light));
+  background: linear-gradient(var(--border-color), var(--accent-indigo));
   border-radius: 6px;
   border: 2px solid var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-blue);
+  background: var(--bg-surface);
 }
 
 /* ==========================================================================
@@ -135,6 +172,12 @@ body {
   animation: fade-in-up var(--transition-slow) both;
 }
 
+/* Entrada con un toque de escala para tarjetas */
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Deslizamiento lateral para toasts */
 @keyframes slide-in-right {
   from { opacity: 0; transform: translateX(120%); }
@@ -160,6 +203,28 @@ body {
   100% { background-position: 200% 0; }
 }
 
+/* Brillo que respira en bordes y tarjetas */
+@keyframes glow-breathe {
+  0%, 100% { box-shadow: 0 8px 24px rgba(44, 74, 82, 0.20), 0 0 0 rgba(142, 155, 151, 0); }
+  50%      { box-shadow: 0 10px 30px rgba(44, 74, 82, 0.26), 0 0 20px rgba(244, 235, 219, 0.14); }
+}
+
+/* Movimiento del brillo ambiental y del texto destacado */
+@keyframes ambient-sheen {
+  0%, 100% { background-position: 0% 50%; opacity: 0.55; }
+  50%      { background-position: 100% 50%; opacity: 0.9; }
+}
+
+@keyframes text-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
 /* Utilidades de texto */
 .mono { font-family: var(--font-mono); }
 .text-muted { color: var(--text-muted); }
@@ -167,6 +232,18 @@ body {
 
 /* Foco accesible coherente */
 :focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-sage);
+  outline-offset: 3px;
+}
+
+/* Respeta la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

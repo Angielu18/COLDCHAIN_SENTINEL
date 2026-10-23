@@ -1,0 +1,254 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 252, 245, 0.95) 0%, transparent 42%),
+    radial-gradient(circle at 84% 6%, rgba(83, 112, 114, 0.26) 0%, transparent 48%),
+    radial-gradient(circle at 50% 112%, rgba(142, 155, 151, 0.30) 0%, transparent 58%),
+    #F4EBDB;
+  padding: 1.5rem;
+}
+
+.login-wrapper::before,
+.login-wrapper::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(18px);
+}
+
+.login-wrapper::before {
+  width: 460px;
+  height: 460px;
+  top: -170px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(244, 235, 219, 0.95), rgba(142, 155, 151, 0.18) 48%, transparent 70%);
+  animation: float-soft 10s ease-in-out infinite;
+}
+
+.login-wrapper::after {
+  width: 520px;
+  height: 520px;
+  right: -180px;
+  bottom: -210px;
+  background: radial-gradient(circle, rgba(83, 112, 114, 0.30), rgba(142, 155, 151, 0.12) 52%, transparent 72%);
+  animation: glow-breathe 9s ease-in-out infinite;
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  background: var(--gradient-card);
+  border: 1px solid rgba(244, 235, 219, 0.28);
+  border-radius: 18px;
+  padding: 2.25rem;
+  box-shadow:
+    0 24px 55px rgba(44, 74, 82, 0.30),
+    0 0 34px rgba(142, 155, 151, 0.20),
+    inset 0 1px 0 rgba(244, 235, 219, 0.16);
+  color: var(--text-main);
+  animation: card-rise 0.65s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(420px 240px at 18% 0%, rgba(244, 235, 219, 0.16), transparent 62%),
+    linear-gradient(120deg, transparent 30%, rgba(244, 235, 219, 0.08) 50%, transparent 70%);
+  background-size: 100% 100%, 220% 100%;
+  animation: sheen 10s ease-in-out infinite;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  background: rgba(244, 235, 219, 0.12);
+  border: 2px solid rgba(244, 235, 219, 0.38);
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 0 24px rgba(244, 235, 219, 0.22), inset 0 0 16px rgba(244, 235, 219, 0.08);
+  animation: float-soft 5s ease-in-out infinite;
+}
+
+.login-header h2 {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  background: linear-gradient(120deg, #F4EBDB 0%, #F4EBDB 46%, #E3DCCF 66%, #F4EBDB 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(244, 235, 219, 0.18));
+  animation: text-shimmer 8s ease-in-out infinite;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.subtitle code {
+  color: var(--text-main);
+  background: rgba(44, 74, 82, 0.38);
+  padding: 0.1rem 0.32rem;
+  border-radius: 4px;
+}
+
+.badge-gxp {
+  display: inline-block;
+  margin-top: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #A9D8C6;
+  background: rgba(16, 185, 129, 0.13);
+  border: 1px solid rgba(16, 185, 129, 0.34);
+  padding: 0.2rem 0.62rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.14);
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid #ef4444;
+  color: #FCA5A5;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.16);
+}
+
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-group input {
+  background: rgba(44, 74, 82, 0.55);
+  border: 1px solid rgba(142, 155, 151, 0.55);
+  border-radius: 9px;
+  padding: 0.68rem 0.88rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
+}
+
+.form-group input::placeholder {
+  color: rgba(244, 235, 219, 0.55);
+}
+
+.form-group input:focus {
+  border-color: #F4EBDB;
+  background: rgba(44, 74, 82, 0.72);
+  box-shadow: 0 0 0 3px rgba(244, 235, 219, 0.14), 0 0 18px rgba(142, 155, 151, 0.26);
+}
+
+.info-approval-note {
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  color: var(--text-main);
+  background: rgba(142, 155, 151, 0.17);
+  border: 1px dashed rgba(244, 235, 219, 0.38);
+  padding: 0.65rem 0.8rem;
+  border-radius: 7px;
+  line-height: 1.45;
+}
+
+.info-approval-note code {
+  color: #F4EBDB;
+}
+
+.btn-submit {
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, #2C4A52 0%, #3F5A5E 55%, #2C4A52 100%);
+  color: var(--text-main);
+  border: 1px solid rgba(244, 235, 219, 0.22);
+  padding: 0.78rem;
+  border-radius: 9px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(44, 74, 82, 0.28);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.btn-submit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(244, 235, 219, 0.24) 50%, transparent 70%);
+  background-size: 220% 100%;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(244, 235, 219, 0.55);
+  box-shadow: 0 9px 24px rgba(44, 74, 82, 0.36), 0 0 22px rgba(142, 155, 151, 0.28);
+}
+
+.btn-submit:hover:not(:disabled)::after {
+  opacity: 1;
+  animation: sheen 1.1s ease;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

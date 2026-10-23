@@ -17,9 +17,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_rol_code ON rol (code);
 
 -- ---------------------------------------------------------------------
 -- 2. USUARIO: soportar estados PENDIENTE/ACTIVO/INACTIVO y auditoría IAM
---    La columna original 'gmail' se conserva (el backend la usa como email).
+--    Unifica la columna 'email'/'gmail' como 'gmail' para compatibilidad total.
 -- ---------------------------------------------------------------------
-ALTER TABLE usuario ADD COLUMN IF NOT EXISTS avatar VARCHAR(10) DEFAULT '👤';
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'usuario' AND column_name = 'email'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'usuario' AND column_name = 'gmail'
+  ) THEN
+    ALTER TABLE usuario RENAME COLUMN email TO gmail;
+  END IF;
+END $$;
+
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS avatar VARCHAR(10) DEFAULT '';
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS approved_by VARCHAR(150);
 ALTER TABLE usuario ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
@@ -47,6 +60,7 @@ ALTER TABLE medicamento ADD COLUMN IF NOT EXISTS optimal_temp VARCHAR(50) DEFAUL
 -- 5. LOTE: la cantidad puede ser decimal (dosis) y guardar ubicación
 -- ---------------------------------------------------------------------
 ALTER TABLE lote ADD COLUMN IF NOT EXISTS id_equipo INT;
+ALTER TABLE lote DROP CONSTRAINT IF EXISTS fk_lote_equipo;
 ALTER TABLE lote ADD CONSTRAINT fk_lote_equipo
   FOREIGN KEY (id_equipo) REFERENCES equipo (id_equipo) ON UPDATE CASCADE ON DELETE SET NULL
   NOT VALID;
@@ -79,6 +93,9 @@ ALTER TABLE notificacion ADD COLUMN IF NOT EXISTS subject VARCHAR(200);
 ALTER TABLE notificacion ADD COLUMN IF NOT EXISTS body TEXT;
 ALTER TABLE notificacion ADD COLUMN IF NOT EXISTS delivery_status VARCHAR(20) DEFAULT 'ENVIADA';
 
+-- Las advertencias de telemetría pueden emitirse antes de que exista un incidente.
+ALTER TABLE notificacion ALTER COLUMN id_anomalia DROP NOT NULL;
+
 -- Ampliar tipos permitidos: Correo, Alerta, SMS
 ALTER TABLE notificacion DROP CONSTRAINT IF EXISTS notificacion_type_check;
 ALTER TABLE notificacion ADD CONSTRAINT notificacion_type_check
@@ -104,6 +121,13 @@ CREATE INDEX IF NOT EXISTS idx_anomalia_status ON anomalia (status);
 CREATE INDEX IF NOT EXISTS idx_anomalia_start_time ON anomalia (start_time DESC);
 CREATE INDEX IF NOT EXISTS idx_lectura_hour_equipo ON lectura (id_equipo, hour DESC);
 CREATE INDEX IF NOT EXISTS idx_usuario_status ON usuario (status);
+
+-- ---------------------------------------------------------------------
+-- 10. IAM: se elimina el flujo de aprobación manual.
+--     Las cuentas heredadas en 'PENDIENTE' pasan a 'INACTIVO' (suspendidas)
+--     y el Director puede activarlas directamente desde el panel IAM.
+-- ---------------------------------------------------------------------
+UPDATE usuario SET status = 'INACTIVO' WHERE status = 'PENDIENTE';
 
 -- =====================================================================
 -- FIN DE LA MIGRACIÓN

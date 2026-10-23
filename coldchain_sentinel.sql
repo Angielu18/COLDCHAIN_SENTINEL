@@ -141,7 +141,7 @@ CREATE TABLE Anomalia (
 -- -----------------------------------------------------------------------------
 CREATE TABLE Notificacion (
     id_notificacion SERIAL PRIMARY KEY,
-    id_anomalia INT NOT NULL,
+    id_anomalia INT,
     type VARCHAR(50) NOT NULL CHECK (type IN ('Correo', 'Alerta')),
     channel VARCHAR(50) NOT NULL,
     sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

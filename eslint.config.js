@@ -10,7 +10,22 @@ export default defineConfig([
     files: ['**/*.{vue,js,mjs,jsx}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores([
+    '**/dist/**',
+    '**/dist-ssr/**',
+    '**/coverage/**',
+    '**/node_modules/**',
+    'COLDCHAIN_SENTINEL/**',
+  ]),
+
+  {
+    files: ['server/**/*.js', 'server.js', 'db.js', 'mailer.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 
   {
     languageOptions: {

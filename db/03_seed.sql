@@ -2,7 +2,7 @@
 -- ColdChain Sentinel - Datos de Prueba (SEED)
 -- Base de datos: coldchain_sentinel2
 -- =====================================================================
--- ✏️  EDITA ESTE ARCHIVO para poner TUS usuarios, correos y roles.
+--  EDITA ESTE ARCHIVO para poner TUS usuarios, correos y roles.
 --
 -- Cómo agregar un usuario nuevo:
 --   1. Busca su id_rol en la tabla 'rol' (1=DIRECTOR, 2=SUPERVISOR,
@@ -21,10 +21,10 @@
 -- ROLES (RBAC)
 -- ---------------------------------------------------------------------
 INSERT INTO rol (id_rol, code, name, description, avatar) VALUES
-  (1, 'DIRECTOR',   'DIRECTOR',   'Director del Laboratorio',  '👨‍💼'),
-  (2, 'SUPERVISOR', 'SUPERVISOR', 'Supervisor de Calidad',     '👩‍⚕️'),
-  (3, 'TECNICO',    'TECNICO',    'Técnico de Turno',          '👨‍🔧'),
-  (4, 'INVENTARIO', 'INVENTARIO', 'Gestor de Inventario',      '📦')
+  (1, 'DIRECTOR',   'DIRECTOR',   'Director del Laboratorio',  ''),
+  (2, 'SUPERVISOR', 'SUPERVISOR', 'Supervisor de Calidad',     ''),
+  (3, 'TECNICO',    'TECNICO',    'Técnico de Turno',          ''),
+  (4, 'INVENTARIO', 'INVENTARIO', 'Gestor de Inventario',      '')
 ON CONFLICT (id_rol) DO UPDATE
   SET code = EXCLUDED.code, name = EXCLUDED.name,
       description = EXCLUDED.description, avatar = EXCLUDED.avatar;
@@ -42,21 +42,23 @@ SELECT setval('rol_id_rol_seq', (SELECT MAX(id_rol) FROM rol));
 INSERT INTO usuario (id_usuario, id_rol, name, last_name, gmail, phone, password_hash, status, avatar, approved_by) VALUES
   (1, 1, 'Dr. Roberto', 'Silva', 'director@coldchain.com', '+57 300 1234567',
      '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
-     'ACTIVO', '👨‍💼', 'Sistema Inicial'),
+     'ACTIVO', '', 'Sistema Inicial'),
   (2, 2, 'Dra. Elena', 'Ramos', 'supervisor@coldchain.com', '+57 300 2345678',
      '02423ab2e61297b8262449c93e19be42fb5bbb275860a7d93b1ebdc7b6535ed7',
-     'ACTIVO', '👩‍⚕️', 'Dr. Roberto Silva'),
+     'ACTIVO', '', 'Dr. Roberto Silva'),
   (3, 3, 'Carlos', 'Méndez', 'tecnico@coldchain.com', '+57 300 3456789',
      '2bd5100f475915a8990f6a4b342ac161e5eb754581d81a4b6462843e63601ada',
-     'ACTIVO', '👨‍🔧', 'Dr. Roberto Silva'),
+     'ACTIVO', '', 'Dr. Roberto Silva'),
   (4, 4, 'Ana', 'Gómez', 'inventario@coldchain.com', '+57 300 4567890',
      'f54568eeb40e6872d8df7afffc13608decaee72e20803a0da71309ece6cc73ea',
-     'ACTIVO', '📦', 'Dr. Roberto Silva'),
-  -- Usuario de prueba en estado PENDIENTE para validar el flujo IAM
+     'ACTIVO', '', 'Dr. Roberto Silva'),
+  -- Cuenta de prueba suspendida: el Director puede activarla desde el panel IAM
   (5, 3, 'Javier', 'Morales', 'javier.morales@hospital.org', '+57 311 9876543',
      'd3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791',
-     'PENDIENTE', '👤', NULL)
+     'INACTIVO', '', NULL)
 ON CONFLICT (id_usuario) DO NOTHING;
+
+SELECT setval('usuario_id_usuario_seq', COALESCE((SELECT MAX(id_usuario) FROM usuario), 1));
 
 -- ---------------------------------------------------------------------
 -- USUARIOS REALES (equipo de la cadena de frío)
@@ -67,14 +69,14 @@ ON CONFLICT (id_usuario) DO NOTHING;
 -- ---------------------------------------------------------------------
 INSERT INTO usuario (id_rol, name, last_name, gmail, phone, password_hash, status, avatar) VALUES
   (3, 'Angie',  'Ramos', 'valesotelo.0806@gmail.com',   '+57 300 0000000',
-     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', '👨‍🔧'),
+     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', ''),
   (2, 'Luisa',  'Gomez', 'luisagomez.080607@gmail.com', '+57 300 0000000',
-     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', '👩‍⚕️'),
+     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', ''),
   (1, 'Brayan', 'Cuta',  'lasanita0204@gmail.com',      '+57 300 0000000',
-     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', '👨‍💼')
+     '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ACTIVO', '')
 ON CONFLICT (gmail) DO NOTHING;
 
-SELECT setval('usuario_id_usuario_seq', (SELECT MAX(id_usuario) FROM usuario));
+SELECT setval('usuario_id_usuario_seq', COALESCE((SELECT MAX(id_usuario) FROM usuario), 1));
 
 -- ---------------------------------------------------------------------
 -- EQUIPOS / SENSORES (sala room_911)
